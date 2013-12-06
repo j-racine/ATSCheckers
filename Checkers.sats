@@ -55,7 +55,10 @@ fun
 draw_loop(cr: !cairo_ref1,width:int, height: int,B: board, Red: pieceList, Black: pieceList, highlight:location,cursor:location,turn:bool):void
 
 fun 
-draw_piece(cr: !cairo)ref1, p: piece) : void
+draw_piece(cr: !cairo_ref1, p: piece, diameter: float) : void
+
+fun 
+draw_board(cr: !cairo_ref1): void
 
 //returns integeer representative of key
 fun 

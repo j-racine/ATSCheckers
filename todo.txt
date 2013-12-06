@@ -1,0 +1,11 @@
+TO-DO List
+
+-Implement pull_Keyboard in C
+-Find out how to link C to ATS
+-write draw_Piece()
+-write draw_Board()
+-implement set_at and get_at
+-research AI Logic(shortsighted ideal move list)
+-Write AI logic
+
+-Main Draw Loop
