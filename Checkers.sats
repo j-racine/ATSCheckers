@@ -58,7 +58,10 @@ fun
 draw_piece(cr: !cairo_ref1, p: piece, diameter: float) : void
 
 fun 
-draw_board(cr: !cairo_ref1): void
+draw_board(cr: !cairo_ref1, hightlight: location, cursor: location): void
+
+fun
+legal_move(b: board, source: square, dest: square) : bool
 
 //returns integeer representative of key
 fun 

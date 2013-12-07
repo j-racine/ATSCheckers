@@ -4,6 +4,7 @@ TO-DO List
 -Find out how to link C to ATS
 -write draw_Piece()
 -write draw_Board()
+-write legal_Move()
 -implement set_at and get_at
 -research AI Logic(shortsighted ideal move list)
 -Write AI logic
