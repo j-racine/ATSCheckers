@@ -69,7 +69,10 @@ fun
 draw_piece{l:agz}(cr: !cairo_ref(l), p: piece, diameter: float) : void
 
 fun 
-draw_board{l:agz}(cr: !cairo_ref(l), hightlight: location, cursor: location): void
+draw_square{l:agz}(cr: !cairo_ref(l), loc: !location, r: double, g: double, b: double): void
+
+fun 
+draw_board{l:agz}(cr: !cairo_ref(l), hightlight: !location, cursor: !location): void
 
 fun
 legal_move(b: board, source: square, dest: square) : bool
