@@ -16,6 +16,7 @@ let
   val () = cairo_set_source_rgb(cr, 0.8, 0.0, 0.0) // red
   fun loop(cr: !cairo_ref1, row: int, col: int): void = 
   let
+    val fact = (if (row > col) then (row - col) else (col - row)):int
     val r = 0.8 - (0.8 * ((row - col) mod 2)) // I hate using if statements
     val scale = 0.125 //dividing board into eighths
     val () = cairo_rectangle(cr, row * scale, col * scale, (row + 1.0) * scale, (col + 1.0) * scale)
