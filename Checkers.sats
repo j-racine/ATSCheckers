@@ -25,6 +25,8 @@ Top-left corner is red, alternates from there.
 
 //board and piecelists should be linear types so that they can get passed around
 
+TRUE = BLACK 
+FALSE = RED
 *)
 
 #include
@@ -66,7 +68,7 @@ fun
 draw_loop{l:agz}(cr: !cairo_ref(l), width:int, height: int,B: board, Red: pieceList, Black: pieceList, highlight:location,cursor:location,turn:bool):void
 
 fun 
-draw_piece{l:agz}(cr: !cairo_ref(l), p: piece, diameter: float) : void
+draw_piece{l:agz}(cr: !cairo_ref(l), p: piece, diameter: double) : void
 
 fun 
 draw_square{l:agz}(cr: !cairo_ref(l), loc: !location, r: double, g: double, b: double): void
