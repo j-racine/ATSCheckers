@@ -75,13 +75,19 @@ fun
 draw_loop{l:agz}(cr: !cairo_ref(l), width:int, height: int,B: board, Red: pieceList, Black: pieceList, highlight:location,cursor:location,turn:bool):void
 
 fun 
-draw_piece{l:agz}(cr: !cairo_ref(l), p: piece, diameter: double) : void
+draw_piece{l:agz}(cr: !cairo_ref(l), loc: !location, squ: !square) : void
+
+fun 
+draw_crown{l:agz}(cr: !cairo_ref(l), loc: !location) : void
 
 fun 
 draw_square{l:agz}(cr: !cairo_ref(l), loc: !location, r: double, g: double, b: double): void
 
 fun 
-draw_board{l:agz}(cr: !cairo_ref(l), hightlight: !location, cursor: !location): void
+draw_board{l:agz}(cr: !cairo_ref(l),b: !board, hightlight: !location, cursor: !location): void
+
+fun 
+initialize_board() : board
 
 fun
 legal_move(b: board, source: location, dest: location) : bool
@@ -99,5 +105,5 @@ listGet (ls: list0 (a), n: int): a
 
 fun mydraw{l:agz}
 (
-  !cairo_ref(l), width: int, height: int
+  !cairo_ref(l), b: !board, width: int, height: int
 ) : void = "ext#Checkers_mydraw"

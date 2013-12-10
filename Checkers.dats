@@ -37,7 +37,7 @@ in
 end
 
 implement
-draw_board{l}(cr, highlight, cursor) = 
+draw_board{l}(cr,b, highlight, cursor) = 
 let
   // assuming that user space is scaled by now
   val () = cairo_rectangle(cr, 0.0, 0.0, 1.0, 1.0)
@@ -50,6 +50,7 @@ let
     val () = cairo_rectangle(cr, row * scale, col * scale, (row + 1.0) * scale, (col + 1.0) * scale)
     val () = cairo_set_source_rgb(cr, r, 0.0, 0.0)
     val () = cairo_fill(cr)
+    val () = draw_piece(cr, L(row,col),board_get_at(b,row,col))
   in
     case+ (row, col) of
     | (7, 7) => 
@@ -64,6 +65,34 @@ let
 in
   loop(cr, 0, 0)
 end
+
+implement
+draw_piece{l}(cr, loc, sq) =
+let
+	val-S (e,color,king) = sq
+	val-L (x,y) = loc
+        var scale = 0.125
+	val () = cairo_set_line_width(cr,0.008)
+	val () = (if (color = true) then cairo_set_source_rgb(cr,0.0,0.0,0.0) else cairo_set_source_rgb(cr,0.4,0.0,0.0)):void
+	val () = cairo_arc(cr, x*scale + scale,y*scale + scale,0.12,0.0,6.288)
+	val () = cairo_stroke_preserve(cr)
+	val () = (if (color = true) then cairo_set_source_rgb(cr,0.1,0.1,0.1) else cairo_set_source_rgb(cr,0.6,0.0,0.0)):void
+	val () = cairo_fill(cr)
+	val () = (if (king = true) then draw_crown(cr,loc) else ()) :void
+in
+end
+
+implement
+draw_crown{l}(cr,loc) = 
+let
+	var scale = 0.125
+	val-L (x,y) = loc
+	val () = cairo_set_line_width(cr,0.004)
+	val () = cairo_set_source_rgb(cr,1.0,0.8,0.2)
+	val () = cairo_move_to(cr,x*scale,y*scale+ scale/4*3)
+in
+end
+
 
 implement{a:t@ype}
 listGet(ls, n) = 
@@ -120,15 +149,27 @@ in
 end
 
 
+implement
+initialize_board() = 
+let 
+    var b = list0<list0(square)>
+    fun loop(b: !board, i: int, j: int) :void  = 
+    case (i,j) of 
+    |(7,7) => board_set_at(b,S(true,true,false),i,j)
+    |(7,j) => if((i mod 2) = (j mod 2)) then loop(board_set_at(b,S(true,true,false),i,j),7,j+1) else loop(b,7,j+1)
+    |(i,7) => if((i mod 2) = (j mod 2)) then loop(board_set_at(b,S(true,i>3,false),i,j),i+1,0) else loop(b,i+1,0)
+    |(i,j) => if((i mod 2) = (j mod 2)) then loop(board_set_at(b,S(true,i>3,false),i,j),i,j+1) else loop(b,i,j+1)
+in
+end
 // --------Included for testing purposes only--------
 
 implement
-mydraw{l}(cr, width, height) = 
+mydraw{l}(cr,b , width, height) = 
 let
   val () = cairo_scale(cr, width*1.0, height*1.0)
   val i = key_get()
   val () = fprintln! (stdout_ref, "key = ", i)
-  val () = draw_board(cr, L(1,2), L(2,1))
+  val () = draw_board(cr,b, L(1,2), L(2,1))
 in  
 end
 

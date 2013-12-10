@@ -19,7 +19,7 @@ UN = "prelude/SATS/unsafe.sats"
 extern
 fun mydraw 
 (
-  cr: !cairo_ref1, width: int, height: int
+  cr: !cairo_ref1, b: !board, width: int, height: int
 ) : void = "ext#Checkers_mydraw" // endfun
 
 (* ****** ****** *)
