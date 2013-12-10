@@ -20,6 +20,7 @@ let
   val () = cairo_line_to(cr, (x+1)*scale, y*scale)
   val () = cairo_line_to(cr, (x+1)*scale, (y+1)*scale)
   val () = cairo_line_to(cr, x*scale, (y+1)*scale)
+  val () = cairo_line_to(cr, x*scale, y* scale)
   val () = cairo_stroke(cr)
 in
 end
