@@ -5,6 +5,12 @@
 #include
 "share/atspre_staload_libats_ML.hats"
 
+%{^
+#include "Checkers.cats"
+%}
+
+extern fun key_get () : int = "mac#"
+
 staload "{$CAIRO}/SATS/cairo.sats"
 staload "./Checkers.sats"
 staload "libats/ML/SATS/basis.sats"
@@ -120,7 +126,9 @@ implement
 mydraw{l}(cr, width, height) = 
 let
   val () = cairo_scale(cr, width*1.0, height*1.0)
+  val i = key_get()
+  val () = fprintln! (stdout_ref, "key = ", i)
   val () = draw_board(cr, L(1,2), L(2,1))
-in
+in  
 end
 
