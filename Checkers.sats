@@ -41,9 +41,10 @@ staload _ = "libats/ML/DATS/list0.dats"
 
 
 // first bool is "ispiecehere" second is "colorofpiece" 
+// third is "is piece king", which I think removes need for the piece datatype
 
 datatype
-square =  S of (bool,bool)
+square =  S of (bool,bool,bool)
 
 datatype 
 location = L of (int,int)
@@ -58,11 +59,17 @@ pieceList = list0 (piece)
 typedef
 board = list0 (list0 (square))
 
-fun
-board_get_at(B: board,Red: pieceList,Black: pieceList,i:int,j:int) : piece
+// fun
+// board_get_at(B: board,Red: pieceList,Black: pieceList,i:int,j:int) : piece
 
 fun
-board_set_at(B: board,p:piece,plist: pieceList,i:int,j:int) : void
+board_get_at(b: board, i: int, j: int) : square
+
+// fun
+// board_set_at(B: board,p:piece,plist: pieceList,i:int,j:int) : void
+
+fun
+board_set_at(b: board, s: square, i: int, j: int) : board
 
 fun
 draw_loop{l:agz}(cr: !cairo_ref(l), width:int, height: int,B: board, Red: pieceList, Black: pieceList, highlight:location,cursor:location,turn:bool):void
@@ -77,7 +84,7 @@ fun
 draw_board{l:agz}(cr: !cairo_ref(l), hightlight: !location, cursor: !location): void
 
 fun
-legal_move(b: board, source: square, dest: square) : bool
+legal_move(b: board, source: location, dest: location) : bool
 
 //returns integeer representative of key
 fun 
@@ -85,6 +92,12 @@ poll_keyboard() : int
 
 fun 
 get_CPU_move(B:board,Red: pieceList, Black: pieceList) : board
+
+fun{a:t@ype} 
+listGet (ls: list0 (a), n: int): a
+
+fun{a:t@ype}
+listSet (ls: list0 (a), n: int, item: a): list0 (a)
 
 fun mydraw{l:agz}
 (

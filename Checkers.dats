@@ -5,6 +5,9 @@
 
 staload "{$CAIRO}/SATS/cairo.sats"
 staload "./Checkers.sats"
+staload "libats/ML/SATS/basis.sats"
+staload "libats/ML/SATS/list0.sats"
+staload _(*anon*) = "libats/ML/DATS/list0.dats"
 
 // --------Actual Code-------- 
 
@@ -54,6 +57,76 @@ in
   loop(cr, 0, 0)
 end
 
+
+
+implement{a:t@ype}
+listGet(ls, n) = 
+let
+  val-list0_cons (x, xs) = ls
+in
+  case+ n of
+  | 0 => x
+  | _ => listGet(xs, n -1)
+end
+
+implement
+board_get_at(b, i, j) =
+let
+in
+  listGet<square>(listGet<list0 (square)>(b, i), j)
+end
+
+implement{a:t@ype}
+listSet(ls, n, item) = 
+let
+  fun loop(ls: list0 (a), head: list0(a), n: int, item: a): list0 (a) = 
+  let
+    val-list0_cons(x, xs) = ls
+  in
+    (if (n = 0) then list0_append(list0_reverse(list0_cons(item, head)), xs) else loop(xs, list0_cons(x, head), n -1, item)): list0 (a)
+  end 
+in
+  loop(ls, list0_nil (), n, item)
+end
+
+implement
+board_set_at(b, s, i, j) = 
+let
+  val list = listGet<list0 (square)>(b, i)
+  val nlist = listSet<square>(list, j, s)
+in
+  listSet(b, i, nlist)
+end
+
+implement
+legal_move(b, source, dest) = 
+let
+  val-L(sx, sy) = source
+  val-L(dx, dy) = dest
+  val-S(exist,black,king) = board_get_at(b, sx, sy) // listGet<square>(listGet<list0 (square)>(b, sx), sy)
+  val valid = exist
+  val-S(dex,dr,dk) = board_get_at(b, dx, dy) // listGet<square>(listGet<list0 (square)>(b, dx), dy)
+  val valid = valid && ~dex
+  val mx = sx - dx
+  val my = (sy - dy):int
+  val valid = valid && ((king || (mx < 0 && black)) || (mx > 0 && ~black))
+  val valid = valid && (((mx/my) = 1) || ((mx/my) = ~1))
+  val skip = (mx = 2 || mx = ~2)
+  val taking = (if (skip) then (
+      let
+        val-S(tex,tr,tk) = board_get_at(b, sx + (mx/2), sy + (my/2)) // listGet<square>(listGet<list0 (square)>(b, sx + (mx/2)), sy + (my/2))
+	val took = tex && ((tr && ~black) || (~tr && black))
+      in
+        took
+      end
+      ) 
+    else true):bool
+  val valid = valid && taking
+in 
+  valid
+end
+
+
 // --------Included for testing purposes only--------
 
 implement
@@ -63,3 +136,4 @@ let
   val () = draw_board(cr, L(1,2), L(2,1))
 in
 end
+
