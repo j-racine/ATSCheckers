@@ -2,6 +2,8 @@
 "share/atspre_define.hats"
 #include
 "share/atspre_staload.hats"
+#include
+"share/atspre_staload_libats_ML.hats"
 
 staload "{$CAIRO}/SATS/cairo.sats"
 staload "./Checkers.sats"
@@ -57,8 +59,6 @@ in
   loop(cr, 0, 0)
 end
 
-
-
 implement{a:t@ype}
 listGet(ls, n) = 
 let
@@ -76,26 +76,13 @@ in
   listGet<square>(listGet<list0 (square)>(b, i), j)
 end
 
-implement{a:t@ype}
-listSet(ls, n, item) = 
-let
-  fun loop(ls: list0 (a), head: list0(a), n: int, item: a): list0 (a) = 
-  let
-    val-list0_cons(x, xs) = ls
-  in
-    (if (n = 0) then list0_append(list0_reverse(list0_cons(item, head)), xs) else loop(xs, list0_cons(x, head), n -1, item)): list0 (a)
-  end 
-in
-  loop(ls, list0_nil (), n, item)
-end
-
 implement
 board_set_at(b, s, i, j) = 
 let
   val list = listGet<list0 (square)>(b, i)
-  val nlist = listSet<square>(list, j, s)
+  val nlist = list0_insert_at_exn(list, j, s)
 in
-  listSet(b, i, nlist)
+  list0_insert_at_exn(b, i, nlist)
 end
 
 implement

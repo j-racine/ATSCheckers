@@ -96,8 +96,6 @@ get_CPU_move(B:board,Red: pieceList, Black: pieceList) : board
 fun{a:t@ype} 
 listGet (ls: list0 (a), n: int): a
 
-fun{a:t@ype}
-listSet (ls: list0 (a), n: int, item: a): list0 (a)
 
 fun mydraw{l:agz}
 (
