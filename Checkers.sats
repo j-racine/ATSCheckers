@@ -90,12 +90,23 @@ legal_move(b: board, source: location, dest: location) : bool
 fun 
 poll_keyboard() : int
 
+fun
+get_all_jumps(b: board, bl: bool, ls: list0 (location), i: int, j: int): list0 (location)
+
 fun 
-get_CPU_move(B:board,Red: pieceList, Black: pieceList) : board
+get_CPU_move(B:board) : board
 
 fun{a:t@ype} 
 listGet (ls: list0 (a), n: int): a
 
+fun
+check_jump(b: board, bl: bool, ox: int, oy: int, dx: int, dy: int): bool
+
+fun
+can_piece_jump(b: board, s:square, loc: location): bool
+
+fun
+can_player_jump(b: board, bl: bool, i: int, j: int): bool
 
 fun mydraw{l:agz}
 (
