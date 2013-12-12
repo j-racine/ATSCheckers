@@ -99,6 +99,9 @@ in
     val mx = (if (input = 100) then 1 else mx):int
     val cx = (if ((cx+mx > 7) || (cx+mx < 0)) then cx else cx+mx):int
     val cy = (if ((cy+my > 7) || (cy+my < 0)) then cy else cy+my):int
+    // val () = print_int(cx)
+    // val () = print_int(cy)
+    // val () = print_newline()
     val () = !cval := L(cx, cy)
     val-L(hx, hy) = hloc
     val update = (((hx = ~1) && (hy = ~1)) && (input = 32))
@@ -112,9 +115,9 @@ in
     | false => 
     let
       val valid = (if (hx > ~1) then legal_move(!(b.b), L(hx, hy), L(cx, cy)) else false):bool
-      val () = (if (can_player_jump(!(b.b), true, 0, 0) && ((hx mod 2) = (cx mod 2))) then print_int(1) else ()):void
+      val () = (if (can_player_jump(!(b.b), true, 0, 0)) then print_int(1) else ()):void
       val valid = valid && ((can_player_jump(!(b.b), true, 0, 0) && ((hx mod 2) = (cx mod 2))) || (~can_player_jump(!(b.b), true, 0, 0) && ~((hx mod 2) = (cx mod 2))))
-      val () = (if valid then print_int(2) else ()):void
+      // val () = (if valid then print_int(2) else ()):void
       val-L(spx, spy) = !(mid.loc)
       val valid = (if (spx > ~1) then (valid && ((spx = hx) && (spy = hy))) else valid):bool
     in

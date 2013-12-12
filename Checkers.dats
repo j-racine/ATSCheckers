@@ -228,14 +228,13 @@ let
   val-S(tex, tbl, tki) = board_get_at(b, i, j)
   val ss = S(tex, tbl, tki)
   val ll = L(i, j)
-  val boo = (tbl = bl) && can_piece_jump(b, ss, ll)
-  val vls = list0_insert_at_exn(ls, 0, ll) //ATS compiler wasn't liking list0_cons(ss, ls) for whatever reason
-  val nls = (if (boo) then (vls) else (ls)):list0(location)
+  val boo = tex && ((tbl = bl) && can_piece_jump(b, ss, ll))
+  val vls = (if (boo) then (list0_cons{location}(ll, ls)) else ls):list0(location)
 in
   case+ (i, j) of
-  | (7, 7) => (nls)
-  | (i, 7) => (get_all_jumps(b, bl, nls, i+1, 0))
-  | (i, j) => (get_all_jumps(b, bl, nls, i, j+1))
+  | (7, 7) => (vls)
+  | (i, 7) => (get_all_jumps(b, bl, vls, i+1, 0))
+  | (i, j) => (get_all_jumps(b, bl, vls, i, j+1))
 end
 
 
@@ -252,7 +251,7 @@ Order of desired moves:
 implement
 get_CPU_move(B) = 
 let
-  val ls = get_all_jumps(B, true, list0_nil(), 0, 0)
+  val ls = get_all_jumps(B, false, list0_nil(), 0, 0)
   fun makeJump(b: board, ls: list0(location), bestSt: location, bestDs: location, rank: int): board = 
   (
     case+ ls of
@@ -260,9 +259,17 @@ let
       let
         val-L(sx, sy) = bestSt
         val-L(dx, dy) = bestDs
+	(*
+	val () = print_int(sx)
+	val () = print_int(sy)
+	val () = print_newline()
+	val () = print_int(dx)
+	val () = print_int(dy)
+	val () = print_newline()
+	*)
       	val (mx, my) = ((dx-sx)/2, (dy-sy)/2)
       	val-S(sex, sbl, ski) = board_get_at(b, sx, sy)
-	val ski = (if ((dy = 7) || (ski = true)) then true else false) : bool
+	val ski = (dy = 7) || (ski = true) // (if ((dy = 7) || (ski = true)) then true else false) : bool
       	val b = board_set_at(b, S(false, sbl, ski), sx, sy)
       	val b = board_set_at(b, S(false, false, false), sx+mx, sy+my)
       	val b = board_set_at(b, S(sex, sbl, ski), dx, dy)
@@ -275,6 +282,7 @@ let
       val nrank = 3 // this is at least a valid jump 
       val-L(xx, xy) = x // location of the square we're jumping from
       val-S (sex, sbl, ski) = board_get_at(b, xx, xy)
+      val () = (if (sbl) then let val () = print_int(4); val () = print_newline() in end else ()):void
       val dir = (if sbl then ~1 else 1):int
       val dir2 = (if ski then ~dir else dir):int
       //now we want to figure out what jump we can attempt
