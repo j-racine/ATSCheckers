@@ -204,13 +204,13 @@ let
   val valid = valid && ~dex
   val mx = sx - dx
   val my = sy - dy
-  val valid = valid && ((king || (my > 0 && black)) || (my < 0 && ~black))
+  val valid = valid && ((king || ((my > 0) && black)) || ((my < 0) && ~black))
   val valid = valid && (((mx/my) = 1) || ((mx/my) = ~1))
   val skip = (mx = 2 || mx = ~2)
   val valid = valid && ((skip && can_player_jump(b, true, 0, 0)) || (~skip))
   val taking = (if (skip) then (
       let
-        val-S(tex,tr,tk) = board_get_at(b, sx + (mx/2), sy + (my/2)) // listGet<square>(listGet<list0 (square)>(b, sx + (mx/2)), sy + (my/2))
+        val-S(tex,tr,tk) = board_get_at(b, sx - (mx/2), sy - (my/2)) //current attempt
 	val took = tex && ((tr && ~black) || (~tr && black))
       in
         took
@@ -362,7 +362,7 @@ in
       val thki = (if ((thki = true) || (lny = 7)) then true else false) : bool
 	  val lkopen = (if ((lkopen = true) && (thki = true)) then true else false) : bool
       val rkopen = (if ((rkopen = true) && (thki = true)) then true else false) : bool
-	  val pos = pos && (lnopen || (rnopen || (lkopen || rkopen)))
+      val pos = pos && (lnopen || (rnopen || (lkopen || rkopen)))
     in
       if pos then
       (
