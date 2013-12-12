@@ -37,6 +37,43 @@ in
 end
 
 implement
+draw_crown{l}(cr,loc) = 
+let
+	var scale = 0.125
+	val-L (x,y) = loc
+	val () = cairo_set_line_width(cr,0.004)
+	val () = cairo_set_source_rgb(cr,1.0,0.8,0.2)
+	val () = cairo_move_to(cr, (x+0.25)*scale, (y+0.33)*scale)
+	val () = cairo_line_to(cr, (x+0.32)*scale, (y+0.41)*scale)
+	val () = cairo_line_to(cr, (x+0.39)*scale, (y+0.25)*scale)
+	val () = cairo_line_to(cr, (x+0.46)*scale, (y+0.41)*scale)
+	val () = cairo_line_to(cr, (x+0.53)*scale, (y+0.25)*scale)
+	val () = cairo_line_to(cr, (x+0.60)*scale, (y+0.41)*scale)
+	val () = cairo_line_to(cr, (x+0.67)*scale, (y+0.25)*scale)
+	val () = cairo_line_to(cr, (x+0.74)*scale, (y+0.33)*scale)
+	val () = cairo_line_to(cr, (x+0.74)*scale, (y+0.66)*scale)
+	val () = cairo_line_to(cr, (x+0.25)*scale, (y+0.66)*scale)
+	val () = cairo_fill(cr)
+in
+end
+
+implement
+draw_piece{l}(cr, loc, sq) =
+let
+	val-S (e,color,king) = sq
+	val-L (x,y) = loc
+        var scale = 0.125
+	val () = cairo_set_line_width(cr,0.008)
+	val () = (if (color = true) then cairo_set_source_rgb(cr,0.0,0.0,0.0) else cairo_set_source_rgb(cr,0.4,0.0,0.0)):void
+	val () = cairo_arc(cr, x*scale + scale,y*scale + scale,0.12,0.0,6.288)
+	val () = cairo_stroke_preserve(cr)
+	val () = (if (color = true) then cairo_set_source_rgb(cr,0.1,0.1,0.1) else cairo_set_source_rgb(cr,0.6,0.0,0.0)):void
+	val () = cairo_fill(cr)
+	val () = (if (king = true) then draw_crown(cr,loc) else ()) :void
+in
+end
+
+implement
 draw_board{l}(cr, highlight, cursor) = 
 let
   // assuming that user space is scaled by now

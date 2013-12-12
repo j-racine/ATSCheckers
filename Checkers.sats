@@ -74,8 +74,11 @@ board_set_at(b: board, s: square, i: int, j: int) : board
 fun
 draw_loop{l:agz}(cr: !cairo_ref(l), width:int, height: int,B: board, Red: pieceList, Black: pieceList, highlight:location,cursor:location,turn:bool):void
 
+fun
+draw_crown{l:agz}(cr: !cairo_ref(l),loc:location) :void 
+
 fun 
-draw_piece{l:agz}(cr: !cairo_ref(l), p: piece, diameter: double) : void
+draw_piece{l:agz}(cr: !cairo_ref(l), loc:location,sq:square) : void
 
 fun 
 draw_square{l:agz}(cr: !cairo_ref(l), loc: !location, r: double, g: double, b: double): void
