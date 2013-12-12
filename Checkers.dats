@@ -76,9 +76,10 @@ in
     var scale = 0.125
     val () = cairo_set_line_width(cr,0.008)
     val () = (if (color = true) then cairo_set_source_rgb(cr,0.0,0.0,0.0) else cairo_set_source_rgb(cr,0.4,0.0,0.0)):void
-    val () = cairo_arc(cr, x*scale + (scale/2),y*scale + (scale/2),0.06,0.0,6.288)
+    val () = cairo_arc(cr, x*scale + (scale/2),y*scale + (scale/2),0.056,0.0,6.288)
     val () = cairo_stroke_preserve(cr)
-    val () = (if (color = true) then cairo_set_source_rgb(cr,0.1,0.1,0.1) else cairo_set_source_rgb(cr,0.45,0.0,0.02)):void
+    val () = cairo_set_line_width(cr,0.004)
+    val () = (if (color = true) then cairo_set_source_rgb(cr,0.2,0.2,0.2) else cairo_set_source_rgb(cr,0.5,0.0,0.0)):void
     val () = cairo_fill(cr)
     val () = (if (king = true) then draw_crown(cr,loc) else ()) :void
   in
@@ -106,7 +107,7 @@ let
     case+ (row, col) of
     | (7, 7) => 
     let
-	  val () = draw_square(cr, cursor, 0.1, 0.1, 0.7)
+      val () = draw_square(cr, cursor, 0.1, 0.1, 0.7)
       val () = draw_square(cr, highlight, 0.7, 0.7, 0.0)
     in
     end
@@ -261,6 +262,7 @@ let
         val-L(dx, dy) = bestDs
       	val (mx, my) = ((dx-sx)/2, (dy-sy)/2)
       	val-S(sex, sbl, ski) = board_get_at(b, sx, sy)
+	val ski = (if ((dy = 7) || (ski = true)) then true else false) : bool
       	val b = board_set_at(b, S(false, sbl, ski), sx, sy)
       	val b = board_set_at(b, S(false, false, false), sx+mx, sy+my)
       	val b = board_set_at(b, S(sex, sbl, ski), dx, dy)
@@ -280,6 +282,8 @@ let
       val mvrn = ((xx + 2) <= 7) && ((xy + 2*dir >= 0) && (xy + 2*dir <= 7)) // can jump right and normally
       val mvlk = ((xx - 2) >= 0) && ((xy + 2*dir2 >= 0) && (xy + 2*dir2 <= 7)) // can jump left and kingly
       val mvrk = ((xx + 2) <= 7) && ((xy + 2*dir2 >= 0) && (xy + 2*dir2 <= 7)) // can jump right and kingly
+      val mvlk = ((ski = true) && (mvlk = true))
+      val mvrk = ((ski = true) && (mvrk = true))
       // now we want to see if an attempted jump is jump, and if so, make this the value we'll recurse upon, re-ranking as needed
       // first find kings to jump, if any are
       val lniski = 
@@ -355,7 +359,10 @@ in
       val lkopen = ~tex
       val-S(tex, tbl, tki) = board_get_at(b, rkx, rky)
       val rkopen = ~tex
-      val pos = pos && (lnopen || (rnopen || (lkopen || rkopen)))
+      val thki = (if ((thki = true) || (lny = 7)) then true else false) : bool
+	  val lkopen = (if ((lkopen = true) && (thki = true)) then true else false) : bool
+      val rkopen = (if ((rkopen = true) && (thki = true)) then true else false) : bool
+	  val pos = pos && (lnopen || (rnopen || (lkopen || rkopen)))
     in
       if pos then
       (

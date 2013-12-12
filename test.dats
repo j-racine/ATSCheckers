@@ -132,6 +132,10 @@ in
         val mx = cx - hx
 	val my = cy - hy
 	val pc = board_get_at(!(b.b), hx, hy)
+	val king = (if (hy = 0) then true else false) : bool
+	val-S(e,c,k) = pc
+	val k =  (if ((k = true) || (king = true)) then true else false) : bool
+	val pc = S(e,c,k)
 	val newb = board_set_at(!(b.b), S(false, false, false), hx, hy)
 	val newb = (if ((mx = ~2) || (mx = 2)) then board_set_at(newb, S(false, false, false), (cx+hx)/2, (cy+hy)/2) else newb):board
 	val newb = board_set_at(newb, pc, cx, cy)
