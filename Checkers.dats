@@ -25,7 +25,7 @@ let
   val () = cairo_set_source_rgb(cr, r, g, b)
   val scale = 0.125
   val-L(x, y) = loc
-  val good = (x > 0) && (y > 0)
+  val good = (x >= 0) && (y >= 0)
 in
   case+ good of
   | true =>
@@ -106,8 +106,8 @@ let
     case+ (row, col) of
     | (7, 7) => 
     let
+	  val () = draw_square(cr, cursor, 0.1, 0.1, 0.7)
       val () = draw_square(cr, highlight, 0.7, 0.7, 0.0)
-      val () = draw_square(cr, cursor, 0.1, 0.1, 0.7)
     in
     end
     | (i, 7) => loop(cr, b, i+1, 0)
