@@ -43,6 +43,10 @@ staload _ = "libats/ML/DATS/list0.dats"
 // first bool is "ispiecehere" second is "colorofpiece" 
 // third is "is piece king", which I think removes need for the piece datatype
 
+abstype board_ptr = ptr
+abstype boolean_ptr = ptr
+abstype loc_ptr = ptr
+
 datatype
 square =  S of (bool,bool,bool)
 
@@ -57,16 +61,10 @@ typedef
 pieceList = list0 (piece)
 
 typedef
-board = list0 (list0 (square))
-
-// fun
-// board_get_at(B: board,Red: pieceList,Black: pieceList,i:int,j:int) : piece
+board = (list0 (list0 (square)))
 
 fun
 board_get_at(b: board, i: int, j: int) : square
-
-// fun
-// board_set_at(B: board,p:piece,plist: pieceList,i:int,j:int) : void
 
 fun
 board_set_at(b: board, s: square, i: int, j: int) : board
@@ -77,21 +75,24 @@ draw_loop{l:agz}(cr: !cairo_ref(l), width:int, height: int,B: board, Red: pieceL
 fun
 draw_crown{l:agz}(cr: !cairo_ref(l),loc:location) :void 
 
-fun 
-draw_piece{l:agz}(cr: !cairo_ref(l), loc:location,sq:square) : void
+fun
+draw_piece{l:agz}(cr: !cairo_ref(l), loc:location, sq:square) : void 
 
 fun 
 draw_square{l:agz}(cr: !cairo_ref(l), loc: !location, r: double, g: double, b: double): void
 
 fun 
-draw_board{l:agz}(cr: !cairo_ref(l), hightlight: !location, cursor: !location): void
+draw_board{l:agz}(cr: !cairo_ref(l), b: board, hightlight: location, cursor: location): void
 
 fun
 legal_move(b: board, source: location, dest: location) : bool
 
 //returns integeer representative of key
+// fun 
+// poll_keyboard() : int
+
 fun 
-poll_keyboard() : int
+key_get () : int = "mac#"
 
 fun
 get_all_jumps(b: board, bl: bool, ls: list0 (location), i: int, j: int): list0 (location)
@@ -113,5 +114,5 @@ can_player_jump(b: board, bl: bool, i: int, j: int): bool
 
 fun mydraw{l:agz}
 (
-  !cairo_ref(l), width: int, height: int
-) : void = "ext#Checkers_mydraw"
+  !cairo_ref(l), width: int, height: int, b: board_ptr, pl: boolean_ptr, cur: loc_ptr, high: loc_ptr, mid: loc_ptr, time: int
+) : void // = "ext#Checkers_mydraw"

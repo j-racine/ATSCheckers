@@ -9,8 +9,6 @@
 #include "Checkers.cats"
 %}
 
-extern fun key_get () : int = "mac#"
-
 staload "{$CAIRO}/SATS/cairo.sats"
 staload "./Checkers.sats"
 staload "libats/ML/SATS/basis.sats"
@@ -27,13 +25,21 @@ let
   val () = cairo_set_source_rgb(cr, r, g, b)
   val scale = 0.125
   val-L(x, y) = loc
-  val () = cairo_move_to(cr, x*scale, y*scale)
-  val () = cairo_line_to(cr, (x+1)*scale, y*scale)
-  val () = cairo_line_to(cr, (x+1)*scale, (y+1)*scale)
-  val () = cairo_line_to(cr, x*scale, (y+1)*scale)
-  val () = cairo_line_to(cr, x*scale, y* scale)
-  val () = cairo_stroke(cr)
+  val good = (x > 0) && (y > 0)
 in
+  case+ good of
+  | true =>
+  let
+    val () = cairo_move_to(cr, x*scale, y*scale)
+    val () = cairo_line_to(cr, (x+1)*scale, y*scale)
+    val () = cairo_line_to(cr, (x+1)*scale, (y+1)*scale)
+    val () = cairo_line_to(cr, x*scale, (y+1)*scale)
+    val () = cairo_line_to(cr, x*scale, y* scale)
+    val () = cairo_stroke(cr)
+  in
+  end
+  | false => ()
+// in
 end
 
 implement
@@ -60,26 +66,33 @@ end
 implement
 draw_piece{l}(cr, loc, sq) =
 let
-	val-S (e,color,king) = sq
-	val-L (x,y) = loc
-        var scale = 0.125
-	val () = cairo_set_line_width(cr,0.008)
-	val () = (if (color = true) then cairo_set_source_rgb(cr,0.0,0.0,0.0) else cairo_set_source_rgb(cr,0.4,0.0,0.0)):void
-	val () = cairo_arc(cr, x*scale + scale,y*scale + scale,0.12,0.0,6.288)
-	val () = cairo_stroke_preserve(cr)
-	val () = (if (color = true) then cairo_set_source_rgb(cr,0.1,0.1,0.1) else cairo_set_source_rgb(cr,0.6,0.0,0.0)):void
-	val () = cairo_fill(cr)
-	val () = (if (king = true) then draw_crown(cr,loc) else ()) :void
+  val-S (e,color,king) = sq
 in
+  case+ e of
+  | false => ()
+  | true => 
+  let
+    val-L (x,y) = loc
+    var scale = 0.125
+    val () = cairo_set_line_width(cr,0.008)
+    val () = (if (color = true) then cairo_set_source_rgb(cr,0.0,0.0,0.0) else cairo_set_source_rgb(cr,0.4,0.0,0.0)):void
+    val () = cairo_arc(cr, x*scale + (scale/2),y*scale + (scale/2),0.06,0.0,6.288)
+    val () = cairo_stroke_preserve(cr)
+    val () = (if (color = true) then cairo_set_source_rgb(cr,0.1,0.1,0.1) else cairo_set_source_rgb(cr,0.45,0.0,0.02)):void
+    val () = cairo_fill(cr)
+    val () = (if (king = true) then draw_crown(cr,loc) else ()) :void
+  in
+  end
 end
 
+
 implement
-draw_board{l}(cr, highlight, cursor) = 
+draw_board{l}(cr, b, highlight, cursor) = 
 let
   // assuming that user space is scaled by now
   val () = cairo_rectangle(cr, 0.0, 0.0, 1.0, 1.0)
   val () = cairo_set_source_rgb(cr, 0.8, 0.0, 0.0) // red
-  fun loop(cr: !cairo_ref1, row: int, col: int): void = 
+  fun loop(cr: !cairo_ref1, b: board, row: int, col: int): void = 
   let
     val fact = (if (row > col) then (row - col) else (col - row)):int
     val r = 0.8 - (0.8 * ((fact) mod 2)) // I hate using if statements
@@ -87,6 +100,8 @@ let
     val () = cairo_rectangle(cr, row * scale, col * scale, (row + 1.0) * scale, (col + 1.0) * scale)
     val () = cairo_set_source_rgb(cr, r, 0.0, 0.0)
     val () = cairo_fill(cr)
+    val-S (thex, thbl, thki) = board_get_at(b, row, col)
+    val () = draw_piece(cr, L(row, col), S(thex, thbl, thki))
   in
     case+ (row, col) of
     | (7, 7) => 
@@ -95,11 +110,11 @@ let
       val () = draw_square(cr, cursor, 0.1, 0.1, 0.7)
     in
     end
-    | (i, 7) => loop(cr, i+1, 0)
-    | (i, j) => loop(cr, i, j+1)
+    | (i, 7) => loop(cr, b, i+1, 0)
+    | (i, j) => loop(cr, b, i, j+1)
   end
 in
-  loop(cr, 0, 0)
+  loop(cr, b, 0, 0)
 end
 
 implement{a:t@ype}
@@ -122,10 +137,12 @@ end
 implement
 board_set_at(b, s, i, j) = 
 let
-  val list = listGet<list0 (square)>(b, i)
+  val list = list0_get_at_exn(b, i) // listGet<list0 (square)>(b, i)
   val nlist = list0_insert_at_exn(list, j, s)
+  val nlist = list0_remove_at_exn(nlist, j+1)
+  val b = list0_insert_at_exn(b, i, nlist)
 in
-  list0_insert_at_exn(b, i, nlist)
+  list0_remove_at_exn(b, i+1)
 end
 
 implement
@@ -185,8 +202,8 @@ let
   val-S(dex,dr,dk) = board_get_at(b, dx, dy) // listGet<square>(listGet<list0 (square)>(b, dx), dy)
   val valid = valid && ~dex
   val mx = sx - dx
-  val my = (sy - dy):int
-  val valid = valid && ((king || (mx < 0 && black)) || (mx > 0 && ~black))
+  val my = sy - dy
+  val valid = valid && ((king || (my > 0 && black)) || (my < 0 && ~black))
   val valid = valid && (((mx/my) = 1) || ((mx/my) = ~1))
   val skip = (mx = 2 || mx = ~2)
   val valid = valid && ((skip && can_player_jump(b, true, 0, 0)) || (~skip))
@@ -230,10 +247,11 @@ Order of desired moves:
 5. Move a piece forward
 *)
 
+// fix to move kings on occasion, and do all parts of a multi-jump
 implement
 get_CPU_move(B) = 
 let
-  val ls = get_all_jumps(B, false, list0_nil(), 0, 0)
+  val ls = get_all_jumps(B, true, list0_nil(), 0, 0)
   fun makeJump(b: board, ls: list0(location), bestSt: location, bestDs: location, rank: int): board = 
   (
     case+ ls of
@@ -383,16 +401,3 @@ in
     movePiece(B, 7, 7)
   end
 end
-
-// --------Included for testing purposes only--------
-
-implement
-mydraw{l}(cr, width, height) = 
-let
-  val () = cairo_scale(cr, width*1.0, height*1.0)
-  val i = key_get()
-  val () = fprintln! (stdout_ref, "key = ", i)
-  val () = draw_board(cr, L(1,2), L(2,1))
-in  
-end
-
