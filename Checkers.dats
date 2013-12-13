@@ -258,12 +258,12 @@ let
     | list0_nil () => if (rank < 4) then (* found a jump *)
       let
         val-L(sx, sy) = bestSt
-        val-L(dx, dy) = bestDs
+        val-L(dx, dy) = bestDs 
 	(*
 	val () = print_int(sx)
 	val () = print_int(sy)
 	val () = print_newline()
-	val () = print_int(dx)
+	val () = print_int(dx) 
 	val () = print_int(dy)
 	val () = print_newline()
 	*)
@@ -282,7 +282,6 @@ let
       val nrank = 3 // this is at least a valid jump 
       val-L(xx, xy) = x // location of the square we're jumping from
       val-S (sex, sbl, ski) = board_get_at(b, xx, xy)
-      val () = (if (sbl) then let val () = print_int(4); val () = print_newline() in end else ()):void
       val dir = (if sbl then ~1 else 1):int
       val dir2 = (if ski then ~dir else dir):int
       //now we want to figure out what jump we can attempt
@@ -292,41 +291,30 @@ let
       val mvrk = ((xx + 2) <= 7) && ((xy + 2*dir2 >= 0) && (xy + 2*dir2 <= 7)) // can jump right and kingly
       val mvlk = ((ski = true) && (mvlk = true))
       val mvrk = ((ski = true) && (mvrk = true))
+      val-S(dex, dbl, dki) = (if (mvln) then board_get_at(b, xx - 2, xy + 2*dir) else S(true, false, false)):square
+      val mvln = mvln && (~dex)
+      val-S(dex, dbl, dki) = (if (mvrn) then board_get_at(b, xx + 2, xy + 2*dir) else S(true, false, false)):square
+      val mvrn = mvrn && (~dex)
+      val-S(dex, dbl, dki) = (if (mvlk) then board_get_at(b, xx - 2, xy + 2*dir2) else S(true, false, false)):square
+      val mvlk = mvlk && (~dex)
+      val-S(dex, dbl, dki) = (if (mvrk) then board_get_at(b, xx + 2, xy + 2*dir2) else S(true, false, false)):square
+      val mvrk = mvrk && (~dex)
       // now we want to see if an attempted jump is jump, and if so, make this the value we'll recurse upon, re-ranking as needed
-      // first find kings to jump, if any are
-      val lniski = 
-        (if mvln then 
-        let
-	  val-S(tex, tbl, tki) = board_get_at(b, xx-1, xy+dir)
-	in
-	  tex && tki
-	end
-	else false):bool
-      val rniski = 
-        (if mvrn then 
-        let
-	  val-S(tex, tbl, tki) = board_get_at(b, xx+1, xy+dir)
-	in
-	  tex && tki
-	end
-	else false):bool
-      val lkiski = 
-        (if mvlk then 
-        let
-	  val-S(tex, tbl, tki) = board_get_at(b, xx-1, xy+dir2)
-	in
-	  tex && tki
-	end
-	else false):bool
-      val rkiski = 
-        (if mvrk then 
-        let
-	  val-S(tex, tbl, tki) = board_get_at(b, xx+1, xy+dir2)
-	in
-	  tex && tki
-	end
-	else false):bool
+      // first find kings to jump, if any are 
+      val-S(tex, tbl, tki) = (if (mvln) then board_get_at(b, xx-1, xy+dir) else S(false, false, false)):square
+      val mvln = mvln && (tex && tbl) 
+      val lniski = (if mvln then tex && tki else false):bool
+      val-S(tex, tbl, tki) = (if (mvrn) then board_get_at(b, xx+1, xy+dir) else S(false, false, false)):square
+      val mvrn = mvrn && (tex && (tbl)) 
+      val rniski = (if mvrn then tex && tki else false):bool
+      val-S(tex, tbl, tki) = (if (mvlk) then board_get_at(b, xx-1, xy+dir2) else S(false, false, false)):square
+      val mvlk = mvlk && (tex && (tbl)) 
+      val lkiski = (if mvlk then tex && tki else false):bool
+      val-S(tex, tbl, tki) = (if (mvrk) then board_get_at(b, xx+1, xy+dir2) else S(false, false, false)):square
+      val mvrk = mvrk && (tex && (tbl)) 
+      val rkiski = (if mvrk then tex && tki else false):bool
       val nrank = (if (lniski || (rniski || (lkiski || rkiski))) then 1 else nrank):int
+      
 	// now if there is a king we definitely want to jump
     in
        case+ (lniski, rniski, lkiski, rkiski) of
@@ -349,7 +337,7 @@ in
   | list0_cons(_, _) => makeJump(B, ls, L(0,0), L(0,0), 4)
   | list0_nil () => (*no jump to make, just move the furthest forward piece forward*)
   let
-    fun movePiece(b: board, i: int, j: int): board =
+    fun movePiece(b: board, i: int, j: int, bestSt: location, bestDs: location, rank: int): board =
     let
       val-S(thex, thbl, thki) = board_get_at(b, i, j)
       val pos = thex && ~thbl
@@ -368,51 +356,39 @@ in
       val-S(tex, tbl, tki) = board_get_at(b, rkx, rky)
       val rkopen = ~tex
       val thki = (if ((thki = true) || (lny = 7)) then true else false) : bool
-	  val lkopen = (if ((lkopen = true) && (thki = true)) then true else false) : bool
+      val lkopen = (if ((lkopen = true) && (thki = true)) then true else false) : bool
       val rkopen = (if ((rkopen = true) && (thki = true)) then true else false) : bool
       val pos = pos && (lnopen || (rnopen || (lkopen || rkopen)))
+      val waiting = (~rkopen || ~lkopen) && thki // we are king, we are in piece's way
+      val nrank = (if (waiting && pos) then 2 else (if pos then 3 else 4):int):int
+      val bestSt = (if (nrank < rank) then L(i, j) else bestSt):location
+      val bestDs = (if (nrank < rank) then
+        let
+	in
+	case+ (lnopen, rnopen, lkopen, rkopen ) of
+	| (true, _, _, _) => L(lnx, lny)
+	| (_, true, _, _) => L(rnx, rny)
+	| (_, _, true, _) => L(lkx, lky)
+	| (_, _, _, _) => L (rkx, rky)
+	end
+      else bestDs):location
+    val rank = (if (nrank < rank) then nrank else rank):int
     in
-      if pos then
-      (
-        case+ (lnopen, rnopen, lkopen, rkopen) of
-	| (true, _, _, _) =>
-	let
-	  val b = board_set_at(b, S(false, thbl, thki), i, j)
-	  val b = board_set_at(b, S(true, thbl, thki), lnx, lny) 
-	in
-	  b
-	end  
-	| (_, true, _, _) =>
-	let
-	  val b = board_set_at(b, S(false, thbl, thki), i, j)
-	  val b = board_set_at(b, S(true, thbl, thki), rnx, rny) 
-	in
-	  b
-	end
-	| (_, _, true, _) =>
-	let
-	  val b = board_set_at(b, S(false, thbl, thki), i, j)
-	  val b = board_set_at(b, S(true, thbl, thki), lkx, lky) 
-	in
-	  b
-	end
-	| (_, _, _, _) => 
-	let
-	  val b = board_set_at(b, S(false, thbl, thki), i, j)
-	  val b = board_set_at(b, S(true, thbl, thki), rkx, rky) 
-	in
-	  b
-	end
-      )
-      else
-      (
-        case+ (i, j) of
-	| (0,0) => b
-	| (i,0) => movePiece(b, i-1, 7)
-	| (i,j) => movePiece(b, i, j-1)
-      )
+    case+ (i, j) of
+    | (0,0) => 
+    let
+      val-L(stx, sty) = bestSt
+      val-L(dsx, dsy) = bestDs
+      val sq = board_get_at(b, stx, sty)
+      val b = board_set_at(b, sq, dsx, dsy)
+      val b = board_set_at(b, S(false, false, false), stx, sty)
+    in
+      b
+    end
+    | (i,0) => movePiece(b, i-1, 7, bestSt, bestDs, rank)
+    | (i,j) => movePiece(b, i, j-1, bestSt, bestDs, rank)
     end
   in
-    movePiece(B, 7, 7)
+    movePiece(B, 7, 7, L(~1, ~1), L(~1, ~1), 4)
   end
 end

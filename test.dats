@@ -115,7 +115,7 @@ in
     | false => 
     let
       val valid = (if (hx > ~1) then legal_move(!(b.b), L(hx, hy), L(cx, cy)) else false):bool
-      val () = (if (can_player_jump(!(b.b), true, 0, 0)) then print_int(1) else ()):void
+      // val () = (if (can_player_jump(!(b.b), true, 0, 0)) then print_int(1) else ()):void
       val valid = valid && ((can_player_jump(!(b.b), true, 0, 0) && ((hx mod 2) = (cx mod 2))) || (~can_player_jump(!(b.b), true, 0, 0) && ~((hx mod 2) = (cx mod 2))))
       // val () = (if valid then print_int(2) else ()):void
       val-L(spx, spy) = !(mid.loc)
