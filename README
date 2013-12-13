@@ -1,0 +1,28 @@
+Please simply use make to produce an executable labeled "test" that is our program. This is guaranteed to compile on CSA2.
+
+This program is a game of checkers, complete with CPU player. The player is always black, located at the bottom of the board going up. The CPU is red.
+
+The object of the game is to remove all the opponents pieces from the board by jumping pieces. The blue outlined square represents the player's cursor. User input is read through standard in. This requires that the player direct input to the TERMINAL from which the program was spawned, and not the window itself (i.e. please keep your terminal window active, and do not background this program). The following keys are accepted as input, the rest are discarded:
+
+w: move the cursor one square "up" (towards the red side)
+a: move the cursor one square "left"
+s: move the cursor one square "down" (towards black)
+d: move the cursor one square "right"
+ : (the space key) select the current square (explained below)
+
+To allow room for game-state updates, input is not checked every frame; therefore it is recommended that consecutive inputs be spaced slightly (please also allow for connection latency when using ssh or similar services to access csa2). The cursor can be moved onto any square. When the space key is first hit, it will highlight the square the cursor is on. If the space key is hit again, the game will attempt to move a player's piece from the previously highlighted square to the cursor's location. If this move is valid, the piece is moved and the CPU Player will take their turn. If this move is not valid for any reason, the highlighted square is deselected, and the player must attempt a different move. Examples of invalid moves include:
+
+- moving from any square which does not contain a player's piece
+- moving to any square not directly diagonal from the origin
+- moving backwards and diagonally while not a king
+- moving 2 squares diagonally without jumping a piece
+- moving 1 square diagonally when a jump is possible (standard checkers rules state that the player MUST jump if they are able to do so)
+- attempting to move a different piece while halfway through a multijump chain*
+
+* a multijump chain is defined as following: after a player has jumped a piece with one of their own pieces, if they can jump again with that same piece they just moved and ONLY that piece, they must do so until such time that that same piece cannot jump again. Each leg of the jump must be performed manually by the player.
+
+Once the player has finished their move, the CPU player will perform their move. The CPU player will only ever perform legal checkers moves, such as moving pieces forward, jumping when it is able to, moving kings backwards, and performing multi-jump chains (note that the CPU player performs ALL STEPS of a jump at once). 
+
+Pieces that reach the opposite home row (the top or bottom of the board) will become kinged, and receive a small symbol denoting such. Kings are allowed to move in any of the 4 diagonals, but are otherwise identical to normal pieces. Beware! The only thing the CPU player covets more than obtaining kings is getting rid of your own.
+
+No special check is done on win condition; the game is lost when the player is unable to make any move (such as due to deadlock or lack of pieces) and the player wins when the CPU is forced to pass its turn likewise. 

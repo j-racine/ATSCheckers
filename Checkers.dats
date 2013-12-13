@@ -198,19 +198,38 @@ legal_move(b, source, dest) =
 let
   val-L(sx, sy) = source
   val-L(dx, dy) = dest
+//  val () = print_newline()
+//  val () = print_int(sx)
+//  val () = print_int(sy)
+//  val () = print_newline()
+//  val () = print_int(dx)
+//  val () = print_int(dy)
+//  val () = print_newline()
   val-S(exist,black,king) = board_get_at(b, sx, sy) // listGet<square>(listGet<list0 (square)>(b, sx), sy)
   val valid = exist
   val-S(dex,dr,dk) = board_get_at(b, dx, dy) // listGet<square>(listGet<list0 (square)>(b, dx), dy)
+//  val () = (if valid then print_int(1) else ()): void
+//  val () = (if valid then print_newline() else ()): void
   val valid = valid && ~dex
-  val mx = sx - dx
-  val my = sy - dy
-  val valid = valid && ((king || ((my > 0) && black)) || ((my < 0) && ~black))
+//  val () = (if valid then print_int(2) else ()): void
+//  val () = (if valid then print_newline() else ()): void
+  val mx = dx - sx // sx - dx
+  val my = dy - sy // sy - dy
+  val valid = valid && ((king || ((my < 0) && black)) || ((my > 0) && ~black))
+//  val () = (if valid then () else print_int(my)):void
+//  val () = (if valid then () else print_newline()):void
+//  val () = (if valid then print_int(3) else ()): void
+//  val () = (if valid then print_newline() else ()): void
   val valid = valid && (((mx/my) = 1) || ((mx/my) = ~1))
+//  val () = (if valid then print_int(4) else ()): void
+//  val () = (if valid then print_newline() else ()): void
   val skip = (mx = 2 || mx = ~2)
   val valid = valid && ((skip && can_player_jump(b, true, 0, 0)) || (~skip))
+//  val () = (if valid then print_int(5) else ()): void
+//  val () = (if valid then print_newline() else ()): void
   val taking = (if (skip) then (
       let
-        val-S(tex,tr,tk) = board_get_at(b, sx - (mx/2), sy - (my/2)) //current attempt
+        val-S(tex,tr,tk) = board_get_at(b, sx + (mx/2), sy + (my/2)) //current attempt
 	val took = tex && ((tr && ~black) || (~tr && black))
       in
         took
@@ -218,6 +237,8 @@ let
       ) 
     else true):bool
   val valid = valid && taking
+//  val () = (if valid then print_int(6) else ()): void
+//  val () = (if valid then print_newline() else ()): void
 in 
   valid
 end
@@ -252,6 +273,78 @@ implement
 get_CPU_move(B) = 
 let
   val ls = get_all_jumps(B, false, list0_nil(), 0, 0)
+  fun cont_jump(b: board, s: square, loc: location): board = 
+  let
+    val jumping = can_piece_jump(b, s, loc)
+  in
+    case+ jumping of
+    | false => b
+    | true =>
+    let 
+      val-L(lx, ly) = loc
+      val-S(ex, bl, ki) = s
+      val dir = (if (bl) then ~1 else 1):int // black goes up the board, red down
+      val dir2 = (if (ki) then ~dir else dir):int //kings go everywhere
+      val left = L(lx + ~2, ly + 2*dir)
+      val right = L(lx + 2, ly + 2*dir)
+      val kl = L(lx + ~2, ly + 2*dir2) // possibly redundant, but that's ok
+      val kr = L(lx + 2, ly + 2*dir2)
+      val-L(lefx, lefy) = left
+      val-L(rigx, rigy) = right
+      val-L(kilx, kily) = kl
+      val-L(kirx, kiry) = kr
+      val jumpln = (if (lefx >= 0) && ((lefy >= 0) && (lefy <= 7)) then check_jump(b, bl, lefx + 1, lefy - dir, lefx, lefy) else false):bool
+      val jumprn = (if (rigx <= 7) && ((rigy >= 0) && (rigy <= 7)) then check_jump(b, bl, rigx - 1, rigy - dir, rigx, rigy) else false):bool
+      val jumplk = (if (kilx >= 0) && ((kily >= 0) && (kily <= 7)) then check_jump(b, bl, kilx + 1, kily - dir2, kilx, kily) else false):bool
+      val jumprk = (if (kirx <= 7) && ((kiry >= 0) && (kiry <= 7)) then check_jump(b, bl, kirx - 1, kiry - dir2, kilx, kiry) else false):bool
+      val b = 
+      (
+      case+ (jumpln, jumprn, jumplk, jumprk) of
+      | (true, _, _, _) => 
+      let
+        val b = board_set_at(b, S(false, bl, ki), lx, ly)
+	val b = board_set_at(b, S(false, false, false), lefx + 1, lefy - dir)
+      	val b = board_set_at(b, S(ex, bl, ki), lefx, lefy)
+      in
+        b
+      end
+      | (_, true, _, _) => 
+      let
+        val b = board_set_at(b, S(false, bl, ki), lx, ly)
+	val b = board_set_at(b, S(false, false, false), rigx - 1, rigy - dir)
+      	val b = board_set_at(b, S(ex, bl, ki), rigx, rigy)
+      in
+        b
+      end
+      | ( _, _, true, _) => 
+      let
+        val b = board_set_at(b, S(false, bl, ki), lx, ly)
+	val b = board_set_at(b, S(false, false, false), kilx + 1, kily - dir2)
+      	val b = board_set_at(b, S(ex, bl, ki), kilx, kily)
+      in
+        b
+      end
+      | (_, _, _, _) => 
+      let
+        val b = board_set_at(b, S(false, bl, ki), lx, ly)
+	val b = board_set_at(b, S(false, false, false), kirx - 1, kiry - dir2)
+      	val b = board_set_at(b, S(ex, bl, ki), kirx, kiry)
+      in
+        b
+      end
+      ):board
+      val nloc = 
+      (
+      case+ (jumpln, jumprn, jumplk, jumprk) of
+      | (true, _, _, _) => L(lefx, lefy)
+      | (_, true, _, _) => L(rigx, rigy)
+      | (_, _, true, _) => L(kilx, kily)
+      | (_, _, _, _) => L(kirx, kiry)
+      ):location
+    in
+      cont_jump(b, s, nloc)
+    end
+  end
   fun makeJump(b: board, ls: list0(location), bestSt: location, bestDs: location, rank: int): board = 
   (
     case+ ls of
@@ -259,20 +352,14 @@ let
       let
         val-L(sx, sy) = bestSt
         val-L(dx, dy) = bestDs 
-	(*
-	val () = print_int(sx)
-	val () = print_int(sy)
-	val () = print_newline()
-	val () = print_int(dx) 
-	val () = print_int(dy)
-	val () = print_newline()
-	*)
       	val (mx, my) = ((dx-sx)/2, (dy-sy)/2)
       	val-S(sex, sbl, ski) = board_get_at(b, sx, sy)
 	val ski = (dy = 7) || (ski = true) // (if ((dy = 7) || (ski = true)) then true else false) : bool
       	val b = board_set_at(b, S(false, sbl, ski), sx, sy)
       	val b = board_set_at(b, S(false, false, false), sx+mx, sy+my)
       	val b = board_set_at(b, S(sex, sbl, ski), dx, dy)
+	val b = cont_jump(b, S(sex, sbl, ski), L(dx, dy))
+	// 
       in
         b
       end

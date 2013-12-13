@@ -116,10 +116,14 @@ in
     let
       val valid = (if (hx > ~1) then legal_move(!(b.b), L(hx, hy), L(cx, cy)) else false):bool
       // val () = (if (can_player_jump(!(b.b), true, 0, 0)) then print_int(1) else ()):void
-      val valid = valid && ((can_player_jump(!(b.b), true, 0, 0) && ((hx mod 2) = (cx mod 2))) || (~can_player_jump(!(b.b), true, 0, 0) && ~((hx mod 2) = (cx mod 2))))
-      // val () = (if valid then print_int(2) else ()):void
+      val valid = valid && ((can_player_jump(!(b.b), true, 0, 0) && ((hx mod 2) = (cx mod 2))) || (~can_player_jump(!(b.b), true, 0, 0) && ~((hx mod 2) = (cx mod 2))))      
       val-L(spx, spy) = !(mid.loc)
+      // val () = print_int(spx)
+      // val () = print_int(spy)
+      // val () = print_newline()
       val valid = (if (spx > ~1) then (valid && ((spx = hx) && (spy = hy))) else valid):bool
+      // val () = (if valid then print_int(2) else ()):void
+      // val () = (if valid then print_newline() else ()):void
     in
       case+ valid of
       | false => 
@@ -143,10 +147,10 @@ in
 	val newb = (if ((mx = ~2) || (mx = 2)) then board_set_at(newb, S(false, false, false), (cx+hx)/2, (cy+hy)/2) else newb):board
 	val newb = board_set_at(newb, pc, cx, cy)
 	val () = !(b.b) := newb
-	val cont = can_player_jump(newb, true, 0, 0)
+	val cont = can_player_jump(newb, true, 0, 0) && ((hx mod 2) = (cx mod 2))
 	val spec = (if cont then L(cx, cy) else L(~1,~1)):location
 	val () = !(mid.loc) := spec
-	val () = !(pl.boolean) := false
+	val () = !(pl.boolean) := cont 
 	val () = !(high.loc) := L(~1, ~1)
       in
       end):void
